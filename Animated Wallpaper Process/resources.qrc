@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>photos/32mm_c_hook_jpg.jpg</file>
+        <file>photos/close.png</file>
+        <file>photos/settings_icon.png</file>
+        <file>photos/checkmark.png</file>
+        <file>photos/notif.png</file>
+        <file>photos/arrow-down.png</file>
+        <file>photos/arrow-up.png</file>
+        <file>photos/reg-icon.png</file>
+        <file>photos/icon.ico</file>
+    </qresource>
+</RCC>
