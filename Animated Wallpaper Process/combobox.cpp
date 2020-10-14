@@ -356,18 +356,6 @@ void ComboBox::hidePopupWindow(){
     menuWind->hide();
 }
 
-
-/*******************************************************************************
-    void ComboBox::valueReady(QVariant)
-
-    Function used for ??????
-*******************************************************************************/
-
-void ComboBox::valueReady(QVariant value){
-    if(value.toRect().height() == 0)
-        hidePopupWindow();
-}
-
 /*******************************************************************************
     void ComboBox::handleItemClick(QListWidgetItem *)
 
