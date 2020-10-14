@@ -1,6 +1,4 @@
-QT += gui core winextras
-
-greaterThan(QT_MAJOR_VERSION, 4) : QT += widgets multimedia multimediawidgets
+QT += widgets gui core winextras
 
 VERSION = 1.0.0.0
 TARGET = "Animated Wallpaper"
