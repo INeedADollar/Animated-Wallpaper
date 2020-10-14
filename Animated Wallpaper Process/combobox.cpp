@@ -1,3 +1,27 @@
+/*******************************************************************************
+MIT License
+
+Copyright (c) 2020 INeedADollar
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE. 
+*******************************************************************************/
+
 #include "combobox.h"
 #include "utility.h"
 
@@ -8,18 +32,47 @@
 #include <QScrollBar>
 #include <QPainter>
 
-/******************* class Window *******************/
+/*******************************************************************************
+    class Window
+
+    Subclass of QWidget.
+    This class is used for showing combobox list and drawing a shadow around the 
+    list widget. The window is transparent and is only used as a support for 
+    drawing and animation.
+*******************************************************************************/
+
 Window::Window(QWidget *parent) : QWidget(parent, Qt::FramelessWindowHint | Qt::Dialog){
     setAttribute(Qt::WA_TranslucentBackground);
 }
+
+/*******************************************************************************
+    void Window::setAnimationDirection(AnimationDirection)
+
+    Function used for setting the animation direction of combobox's list 
+    animation.
+*******************************************************************************/
 
 void Window::setAnimationDirection(AnimationDirection dir){
     animDir = dir;
 }
 
+/*******************************************************************************
+    QSize Window::sizeHint() const
+
+    Reimplements QWidget::sizeHint().
+    Calculates best size needed for this window.
+*******************************************************************************/
+
 QSize Window::sizeHint() const{
     return childrenRect().size() + QSize(5, 5);
 }
+
+/*******************************************************************************
+    void Window::showEvent(QShowEvent *)
+
+    Reimplements QWidget::showEvent().
+    Function used for animation of the window when it is showed.
+*******************************************************************************/
 
 void Window::showEvent(QShowEvent *){
     if(animDir == Down){
@@ -37,6 +90,13 @@ void Window::showEvent(QShowEvent *){
         animat->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }
+
+/*******************************************************************************
+    void Window::paintEvent(QPaintEvent *)
+
+    Reimplements QWidget::paintEvent().
+    Function used for drawing a shadow around combobox's list .
+*******************************************************************************/
 
 void Window::paintEvent(QPaintEvent *){
     QPainter painter(this);
@@ -65,14 +125,35 @@ void Window::paintEvent(QPaintEvent *){
         painter.drawRect(QRectF(QPoint(0, scaleFactor * 10), (QSizeF)size() - QSizeF(3.32, 3.32)));
 }
 
-/******************* class ListView *******************/
+/*******************************************************************************
+    class ListView
+
+    Subclass of QListWidget.
+    This class is used for showing options to user to choose from. Represents 
+    the menu of combobox.
+*******************************************************************************/
+
 ListView::ListView(QWidget *parent) : QListWidget(parent){
 
 }
 
+/*******************************************************************************
+    void ListView::setAnimationDirection(AnimationDirection)
+
+    Function used for setting the animation direction of combobox's list 
+    animation.
+*******************************************************************************/
+
 void ListView::setAnimationDirection(AnimationDirection dir){
     animDir = dir;
 }
+
+/*******************************************************************************
+    void ListView::focusOutEvent(QFocusEvent *)
+
+    Reimplements QAbstractItemView::focusOutEvent().
+    Function used for animation of the combobox's menu when this loses focus.
+*******************************************************************************/
 
 void ListView::focusOutEvent(QFocusEvent *event){
     if(animDir == Down){
@@ -96,15 +177,29 @@ void ListView::focusOutEvent(QFocusEvent *event){
         });
     }
 
-    QListWidget::focusOutEvent(event);
+    QAbstractItemView::focusOutEvent(event);
 }
 
-/******************* class ComboBox *******************/
+/*******************************************************************************
+    class ComboBox
+
+    Subclass of QLabel.
+    This class is used as a rectangular that shows the current selected item of 
+    the list and for showing the menu of combobox.
+*******************************************************************************/
+
 ComboBox::ComboBox(QWidget *parent) : QLabel(parent)
 {
     setStyleSheet("QLabel { border: 1px solid #009fc7; background-color: #009fc7;}");
     createMenu();
 }
+
+/*******************************************************************************
+    void ComboBox::addItem(const QString)
+
+    Function used for adding an item to menu of combobox. After adding the item,
+    menu size will be adjusted.
+*******************************************************************************/
 
 void ComboBox::addItem(const QString item){
     m_view->addItem(item);
@@ -117,9 +212,21 @@ void ComboBox::addItem(const QString item){
     selectItem(m_view->model()->rowCount() - 1);
 }
 
+/*******************************************************************************
+    bool ComboBox::isPopupShown()
+
+    Function used for checking if menu of combobox is showed.
+*******************************************************************************/
+
 bool ComboBox::isPopupShown(){
     return menuWind->isVisible();
 }
+
+/*******************************************************************************
+    void ComboBox::selectItem(int)
+
+    Function used for programatically selecting an item from menu.
+*******************************************************************************/
 
 void ComboBox::selectItem(int row){
     if(row > m_view->model()->rowCount() - 1)
@@ -128,6 +235,12 @@ void ComboBox::selectItem(int row){
     m_view->setCurrentRow(row);
     setText(QFontMetrics(font()).elidedText(m_view->item(row)->data(Qt::DisplayRole).toString(), Qt::ElideRight, width() - button->width()));
 }
+
+/*******************************************************************************
+    void ComboBox::createMenu()
+
+    Function used for creating the menu of combobox.
+*******************************************************************************/
 
 void ComboBox::createMenu(){
     menuWind = new Window(this);
@@ -144,6 +257,14 @@ void ComboBox::createMenu(){
     button->setIcon(QIcon(":/photos/arrow-down.png"));
     button->setAttribute(Qt::WA_TransparentForMouseEvents);
 }
+
+/*******************************************************************************
+    QPoint ComboBox::getRightPopupPos()
+
+    Function used for calculating the right position for showing combobox's 
+    menu. This function takes into cosideration the position of taskbar and 
+    display size.
+*******************************************************************************/
 
 QPoint ComboBox::getRightPopupPos(){
     QPoint parPos = mapToGlobal(rect().bottomLeft());
@@ -197,6 +318,12 @@ QPoint ComboBox::getRightPopupPos(){
         return parPos;
 }
 
+/*******************************************************************************
+    void ComboBox::showPopupWindow()
+
+    Function used for showing combobox's menu.
+*******************************************************************************/
+
 void ComboBox::showPopupWindow(){
     QPoint menuPos = getRightPopupPos();
     qreal scaleFactor = QApplication::primaryScreen()->logicalDotsPerInch() / 96;
@@ -217,16 +344,35 @@ void ComboBox::showPopupWindow(){
     menuWind->show();
 }
 
+/*******************************************************************************
+    void ComboBox::hidePopupWindow()
+
+    Function used for hiding combobox's menu.
+*******************************************************************************/
+
 void ComboBox::hidePopupWindow(){
     setStyleSheet("QLabel { border: 1px solid #009fc7; background-color: #009fc7;}");
     button->setIcon(QIcon(":/photos/arrow-down.png"));
     menuWind->hide();
 }
 
+
+/*******************************************************************************
+    void ComboBox::valueReady(QVariant)
+
+    Function used for ??????
+*******************************************************************************/
+
 void ComboBox::valueReady(QVariant value){
     if(value.toRect().height() == 0)
         hidePopupWindow();
 }
+
+/*******************************************************************************
+    void ComboBox::handleItemClick(QListWidgetItem *)
+
+    Function used for handling click of an item in the list.
+*******************************************************************************/
 
 void ComboBox::handleItemClick(QListWidgetItem *item){
     QString itemText = item->data(Qt::DisplayRole).toString();
@@ -256,6 +402,13 @@ void ComboBox::handleItemClick(QListWidgetItem *item){
     emit itemSelected(m_view->row(item));
 }
 
+/*******************************************************************************
+    void ComboBox::mousePressEvent(QMouseEvent *)
+
+    Reimplements QLabel::mousePressEvent().
+    Function used for showing combobox's menu when clicking on this QLabel.
+*******************************************************************************/
+
 void ComboBox::mousePressEvent(QMouseEvent *e){
     if(e->button() == Qt::LeftButton){
         if(isPopupShown()){
@@ -275,10 +428,25 @@ void ComboBox::mousePressEvent(QMouseEvent *e){
     QLabel::mousePressEvent(e);
 }
 
+/*******************************************************************************
+    void ComboBox::enterEvent(QEvent *event)
+
+    Reimplements QWidget::enterEvent().
+    Function used for changing mouse cursor when hovering on this QLabel.
+*******************************************************************************/
+
 void ComboBox::enterEvent(QEvent *event){
     setCursor(QCursor(Qt::PointingHandCursor));
     QWidget::enterEvent(event);
 }
+
+/*******************************************************************************
+    void ComboBox::resizeEvent(QResizeEvent *event)
+
+    Reimplements QWidget::resizeEvent().
+    Function used for resizing whole combobox when dpi of primary display is 
+    changed.
+*******************************************************************************/
 
 void ComboBox::resizeEvent(QResizeEvent *event){
     qreal scaleFactor = QApplication::primaryScreen()->logicalDotsPerInch() / 96;
